@@ -7,7 +7,15 @@
   <title>Pig Game</title>
 </head>
 <body>
-
+  <input
+    id='inputName'
+    type="text"/>
+  <input 
+    value="add player" 
+    type="submit" 
+    onclick="addPlayer(document.getElementById('inputName').value)">
+  <ul id="listOfPlayers"></ul>
+  <button id="play" onclick="play()">Roll Dices</button>
 </body>
 <script type="text/javascript" src="app.js"></script>
 </html>

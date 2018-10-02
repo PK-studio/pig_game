@@ -1,4 +1,4 @@
-class dice{
+class Dice{
   constructor(){
     this.sides = 6,
     this.state = {
@@ -9,10 +9,9 @@ class dice{
   }
   calculation(){
     this.state.result = Math.floor((Math.random() * this.sides)+1);
-    console.log(this.state.result)
   }
   roll(){
-    this.state.rolling = setInterval(this.calculation, 1000);
+    this.state.rolling = setInterval(this.calculation, 100);
   }
   stop(){
     clearInterval(this.state.rolling);
@@ -23,59 +22,98 @@ class dice{
   }
 }
 
-class player{
-  constructor(score){
-    this.state = {
-      score: score
-    }
-  }
+class Player{
+  constructor(getName){
+    this.name = getName;
+    this.score = 0;
+  };
   addToScore(num){
-    this.state.score += num;
+    this.score += num;
   }
   resetScore(){
-    this.state.score = 0;
+    this.score = 0;
   }
   score(){
-    return this.state.score;
+    return this.score;
+  }
+  name(){
+    return this.name;
   }
 }
 
-const dice1 = new dice();
-const dice2 = new dice();
+const dice1 = new Dice();
+const dice2 = new Dice();
 
-const player1 = new player(0);
-const player2 = new player(0);
+let players = []
+let rollingDice = false;
+let playersTurn;
 
-let players = [player1,player2]
-let turnOfPlayer = players[0];
+const dataTable = document.getElementById("listOfPlayers");
+const inputName = document.getElementById('inputName')
+const playBtn = document.getElementById('play')
 
 function checkRules(res1, res2){
-  console.log('rolled: ' + res1 +', '+ res2)
   if(res1==1 && res2==1){
-    turnOfPlayer.resetScore();
+    alert("double one's restarts score")
+    playersTurn.resetScore();
   }
   else if(res1==1 || res2==1){
-    return;
+    alert("single one's loses turn")
   }
   else{
-    turnOfPlayer.addToScore(res1+res2);
+    playersTurn.addToScore((res1+res2));
   }
   
-  if(turnOfPlayer.score() >= 100){
-    console.log('Score: '+ turnOfPlayer.score());
-    return 'The winer is ' + turnOfPlayer;
+  if(playersTurn.score >= 100){
+    dataTable.innerHTML = `<h2>Winner: ${playersTurn.name}</h2>`;
+    players.splice(0, players.length);
   }
-  else {
-    console.log('Score: '+ turnOfPlayer.score());
+  else displayData();
+  
+}
+
+function addPlayer(playerName){
+  if(!playerName) return;
+  players.push(new Player(playerName));
+  inputName.value = '';
+  playersTurn = players[0]
+  displayData();
+}
+
+function displayData(){
+  let output = `<h2>List of players</h2>`
+  players.forEach(element => {
+    output +=`
+    <li>
+      <h4>${element.name} : ${element.score}</h4>
+    </li>`;
+  });
+  output  += `will rool player: ${playersTurn.name}`
+  dataTable.innerHTML = output;
+}
+
+function play(){
+  if(players.length < 2) {
+    alert("You need at least 2 players")
+    return;
+  }
+  rollingDice = !rollingDice;
+  if(rollingDice) {
+    playBtn.innerHTML = "Stop Dices"
+    rollDices();
+  }
+  else{
+    playBtn.innerHTML = "Roll Dices"
+    stopDices();
     changePlayer();
-    console.log("next player is: " +turnOfPlayer.constructor.name);
-  };
+  }
 }
 
 function changePlayer(){
-  let numOfPlayer = players.indexOf(turnOfPlayer)
-  if(numOfPlayer == players.length-1) turnOfPlayer = players[0]
-  else turnOfPlayer = players[numOfPlayer + 1];
+    let numOfPlayer = players.indexOf(playersTurn)
+    if(numOfPlayer == players.length-1) playersTurn = players[0]
+    else playersTurn = players[numOfPlayer + 1];
+    displayData();
 }
 
 function rollDices(){
@@ -83,7 +121,7 @@ function rollDices(){
   dice2.roll();
 }
 
-function stopDicess(){
+function stopDices(){
   dice1.stop();
   dice2.stop();
   checkRules(dice1.getResult(),dice2.getResult())
